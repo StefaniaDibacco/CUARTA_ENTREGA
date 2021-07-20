@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+<script type="text/javascript" src="https://unpkg.com/rxjs@%5E7/dist/bundles/rxjs.umd.min.js"></script>
+
+<script type="text/javascript">
+
+    const { Observable, fromEvent, map, pipe } = rxjs;
+
+    function reverseString(str) {
+      return str.split("").reverse().join("");
+    }
+
+    
+    window.onload = function () {
+      
+      const input = document.getElementById('entrada');
+      const output = document.getElementById('salida');
+
+      const miCustomObservable = new Observable((observable) => {
+
+        input.addEventListener('input', (e) => {
+          let salida = e.target.value;
+          
+            if (input.value == 'error')
+            observable.error('Ingresaron Error');
+
+            if (input.value == 'complete')
+            observable.complete()
+
+            if (e.data == null) {
+                salida = output.value.substring(1)
+            }
+            observable.next(salida)
+        });
+    });
+
+    const miFuncionNext = (data) => {
+      output.value = data;
+    };
+
+    const miFuncionComplete = () => {
+      console.log(`COMPLETE`);
+      input.disabled = true;
+      input.value = '';
+      output.value = '';
+      sub.unsubscribe();
+    };
+
+    const miFuncionError = (msg) => {
+      console.log(`ERROR ===> ${msg}`);
+      input.disabled = true;
+      input.value = '';
+      output.value = '';
+      sub.unsubscribe();
+    };
+    const handler = {
+      next: miFuncionNext,
+      error: miFuncionError,
+      complete: miFuncionComplete
+    };
+
+    const sub = miCustomObservable
+    .pipe(map((salida) => reverseString(salida)))
+    .subscribe(handler);
+
+
+    setTimeout(() => {
+      console.log("YA me canse de escuchar");
+      sub.unsubscribe();
+      input.disabled = true;
+      output.value= '';
+      }, 30000)
+  
+    }
+              
+
+</script>
+</head>
+<body>
+    <input type="text" value="" id="entrada">
+    <br />
+    <input type="text" value="" id="salida">
+</body>
+</html>
